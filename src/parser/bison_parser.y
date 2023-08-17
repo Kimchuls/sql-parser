@@ -201,7 +201,7 @@
     %token DEALLOCATE PARAMETERS INTERSECT TEMPORARY TIMESTAMP
     %token DISTINCT NVARCHAR RESTRICT TRUNCATE ANALYZE BETWEEN
     %token CASCADE COLUMNS CONTROL DEFAULT EXECUTE EXPLAIN
-    %token INTEGER NATURAL PREPARE PRIMARY SCHEMAS CHARACTER_VARYING REAL DECIMAL SMALLINT BIGINT
+    %token INTEGER VECTOR SIMILAR NATURAL PREPARE PRIMARY SCHEMAS CHARACTER_VARYING REAL DECIMAL SMALLINT BIGINT
     %token SPATIAL VARCHAR VIRTUAL DESCRIBE BEFORE COLUMN CREATE DELETE DIRECT
     %token DOUBLE ESCAPE EXCEPT EXISTS EXTRACT CAST FORMAT GLOBAL HAVING IMPORT
     %token INSERT ISNULL OFFSET RENAME SCHEMA SELECT SORTED
@@ -252,7 +252,7 @@
     %type <table>                  join_clause table_ref_name_no_alias
     %type <expr>                   expr operand scalar_expr unary_expr binary_expr logic_expr exists_expr extract_expr cast_expr
     %type <expr>                   function_expr between_expr expr_alias param_expr
-    %type <expr>                   column_name literal int_literal num_literal string_literal bool_literal date_literal interval_literal
+    %type <expr>                   column_name literal int_literal num_literal vector_literal string_literal bool_literal date_literal interval_literal
     %type <expr>                   comp_expr opt_where join_condition opt_having case_expr case_list in_expr hint
     %type <expr>                   array_expr array_index null_literal
     %type <limit>                  opt_limit opt_top
@@ -586,6 +586,7 @@ column_type : BIGINT { $$ = ColumnType{DataType::BIGINT}; }
 | BOOLEAN { $$ = ColumnType{DataType::BOOLEAN}; }
 | CHAR '(' INTVAL ')' { $$ = ColumnType{DataType::CHAR, $3}; }
 | CHARACTER_VARYING '(' INTVAL ')' { $$ = ColumnType{DataType::VARCHAR, $3}; }
+| VECTOR '(' INTVAL ')' {$$ = ColumnType{DataType::VECTOR, $3};}
 | DATE { $$ = ColumnType{DataType::DATE}; };
 | DATETIME { $$ = ColumnType{DataType::DATETIME}; }
 | DECIMAL opt_decimal_specification {
@@ -1050,7 +1051,9 @@ column_name : IDENTIFIER { $$ = Expr::makeColumnRef($1); }
 | '*' { $$ = Expr::makeStar(); }
 | IDENTIFIER '.' '*' { $$ = Expr::makeStar($1); };
 
-literal : string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
+literal : vector_literal | string_literal | bool_literal | num_literal | null_literal | date_literal | interval_literal | param_expr;
+
+vector_literal: VECTOR STRING { $$ = Expr::makeVectorLiteral($2); };
 
 string_literal : STRING { $$ = Expr::makeLiteral($1); };
 

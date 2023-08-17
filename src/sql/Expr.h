@@ -2,6 +2,7 @@
 #define SQLPARSER_EXPR_H
 
 #include <stdlib.h>
+#include <boost/container/pmr/polymorphic_allocator.hpp>
 #include <memory>
 #include <vector>
 #include "ColumnType.h"
@@ -9,6 +10,9 @@
 namespace hsql {
 struct SelectStatement;
 struct OrderDescription;
+template <typename T>
+using PolymorphicAllocator = boost::container::pmr::polymorphic_allocator<T>;
+using float_array = std::basic_string<double, std::char_traits<double>, PolymorphicAllocator<double>>;
 
 // Helper function used by the lexer.
 // TODO: move to more appropriate place.
@@ -17,6 +21,7 @@ char* substr(const char* source, int from, int to);
 enum ExprType {
   kExprLiteralFloat,
   kExprLiteralString,
+  kExprLiteralVector,
   kExprLiteralInt,
   kExprLiteralNull,
   kExprLiteralDate,
@@ -44,6 +49,7 @@ enum OperatorType {
   // n-nary special case
   kOpCase,
   kOpCaseListElement,  // `WHEN expr THEN expr`
+  //kOpSimilarVector
 
   // Binary operators.
   kOpPlus,
@@ -137,6 +143,7 @@ struct Expr {
   double fval;
   int64_t ival;
   int64_t ival2;
+  float_array fvval;
   DatetimeField datetimeField;
   ColumnType columnType;
   bool isBoolLiteral;
@@ -181,6 +188,7 @@ struct Expr {
   static Expr* makeLiteral(double val);
 
   static Expr* makeLiteral(char* val);
+  static Expr* makeVectorLiteral(char* string);
 
   static Expr* makeLiteral(bool val);
 

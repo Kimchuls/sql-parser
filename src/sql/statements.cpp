@@ -35,6 +35,9 @@ bool operator!=(const ColumnType& lhs, const ColumnType& rhs) { return !(lhs == 
 
 std::ostream& operator<<(std::ostream& stream, const ColumnType& column_type) {
   switch (column_type.data_type) {
+    case DataType::VECTOR:
+      stream << "VECTOR";
+      break;
     case DataType::UNKNOWN:
       stream << "UNKNOWN";
       break;

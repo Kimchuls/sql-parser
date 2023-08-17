@@ -1,5 +1,6 @@
 #include "Expr.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "SelectStatement.h"
 
@@ -155,6 +156,50 @@ Expr* Expr::makeLiteral(double value) {
 Expr* Expr::makeLiteral(char* string) {
   Expr* e = new Expr(kExprLiteralString);
   e->name = string;
+  return e;
+}
+
+Expr* Expr::makeVectorLiteral(char* string) {
+  Expr* e = new Expr(kExprLiteralVector);
+  std::string::size_type pos = 0, length = strlen(string);
+  float_array result;
+  while (pos < length) {
+    if (string[pos] == '[' || string[pos] == ']') {
+      pos++;
+    } else {
+      while (string[pos] == ' ') {
+        pos++;
+      }
+      double number = 0.0, t = 1.0;
+      while (string[pos] >= '0' && string[pos] <= '9') {
+        number = number * 10 + 1.0 * (int)(string[pos] - '0');
+        pos++;
+      }
+      if (string[pos] == '.') {
+        pos++;
+      }
+      while (string[pos] >= '0' && string[pos] <= '9') {
+        t *= 0.1;
+        number = number + t * (int)(string[pos] - '0');
+        pos++;
+      }
+      while (string[pos] == ' ') {
+        pos++;
+      }
+      if (string[pos] == ',' || string[pos] == ']')  {
+        pos++;
+        result += number;
+      } else {
+        printf("data format for float array is wrong");
+      }
+    }
+  }
+  e->fvval = result;
+  // printf("data: ");
+  // for (float_array::size_type i = 0; i < result.size(); i++) {
+  //   printf("%lf\n", result[i]);
+  // }
+  // printf("\n");
   return e;
 }
 

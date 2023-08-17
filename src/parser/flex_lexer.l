@@ -216,6 +216,7 @@ UPDATE      TOKEN(UPDATE)
 USING       TOKEN(USING)
 VALUES      TOKEN(VALUES)
 VARCHAR     TOKEN(VARCHAR)
+VECTOR      TOKEN(VECTOR)
 VIEW        TOKEN(VIEW)
 VIRTUAL     TOKEN(VIRTUAL)
 WHEN        TOKEN(WHEN)
@@ -234,6 +235,7 @@ CHARACTER[ \t\n]+VARYING TOKEN(CHARACTER_VARYING)
 "<="        TOKEN(LESSEQ)
 ">="        TOKEN(GREATEREQ)
 "||"        TOKEN(CONCAT)
+"<->"       TOKEN(SIMILAR)
 
 [-+*/(){},.;<>=^%:?[\]|]    { return yytext[0]; }
 

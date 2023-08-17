@@ -21,6 +21,7 @@ enum class DataType {
   TEXT,
   TIME,
   VARCHAR,
+  VECTOR,
 };
 
 // Represents the type of a column, e.g., FLOAT or VARCHAR(10)
