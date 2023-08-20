@@ -12,7 +12,7 @@ struct SelectStatement;
 struct OrderDescription;
 template <typename T>
 using PolymorphicAllocator = boost::container::pmr::polymorphic_allocator<T>;
-using float_array = std::basic_string<double, std::char_traits<double>, PolymorphicAllocator<double>>;
+using float_array = std::basic_string<float, std::char_traits<float>, PolymorphicAllocator<float>>;
 
 // Helper function used by the lexer.
 // TODO: move to more appropriate place.

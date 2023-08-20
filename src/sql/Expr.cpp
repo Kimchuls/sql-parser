@@ -190,7 +190,8 @@ Expr* Expr::makeVectorLiteral(char* string) {
         pos++;
         result += number;
       } else {
-        printf("data format for float array is wrong");
+        printf("data format for float array is wrong: %s\n",string);
+        exit(0);
       }
     }
   }
