@@ -170,7 +170,11 @@ Expr* Expr::makeVectorLiteral(char* string) {
       while (string[pos] == ' ') {
         pos++;
       }
-      double number = 0.0, t = 1.0;
+      double number = 0.0, t = 1.0,syb=1.0;
+      if(string[pos]=='-'){
+        syb=-1.0;
+        pos++;
+      }
       while (string[pos] >= '0' && string[pos] <= '9') {
         number = number * 10 + 1.0 * (int)(string[pos] - '0');
         pos++;
@@ -188,7 +192,7 @@ Expr* Expr::makeVectorLiteral(char* string) {
       }
       if (string[pos] == ',' || string[pos] == ']')  {
         pos++;
-        result += number;
+        result += number*syb;
       } else {
         printf("data format for float array is wrong: %s\n",string);
         exit(0);

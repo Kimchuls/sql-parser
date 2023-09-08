@@ -319,6 +319,7 @@ union HSQL_STYPE
   hsql::SetOperation* set_operator_t;
   hsql::TableConstraint* table_constraint_t;
   hsql::TableElement* table_element_t;
+  hsql::TableElement* table_index_element_t;
   hsql::TableName table_name;
   hsql::TableRef* table;
   hsql::UpdateClause* update_t;
@@ -331,6 +332,7 @@ union HSQL_STYPE
   std::vector<hsql::OrderDescription*>* order_vec;
   std::vector<hsql::SQLStatement*>* stmt_vec;
   std::vector<hsql::TableElement*>* table_element_vec;
+  std::vector<hsql::TableElement*>* table_index_element_vec;
   std::vector<hsql::TableRef*>* table_vec;
   std::vector<hsql::UpdateClause*>* update_vec;
   std::vector<hsql::WithDescription*>* with_description_vec;
@@ -341,7 +343,7 @@ union HSQL_STYPE
   hsql::RowLockMode lock_mode_t;
   hsql::RowLockWaitPolicy lock_wait_policy_t;
 
-#line 345 "bison_parser.h"
+#line 347 "bison_parser.h"
 
 };
 typedef union HSQL_STYPE HSQL_STYPE;

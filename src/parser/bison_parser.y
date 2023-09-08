@@ -138,6 +138,7 @@
   hsql::SetOperation* set_operator_t;
   hsql::TableConstraint* table_constraint_t;
   hsql::TableElement* table_element_t;
+  hsql::TableElement* table_index_element_t;
   hsql::TableName table_name;
   hsql::TableRef* table;
   hsql::UpdateClause* update_t;
@@ -150,6 +151,7 @@
   std::vector<hsql::OrderDescription*>* order_vec;
   std::vector<hsql::SQLStatement*>* stmt_vec;
   std::vector<hsql::TableElement*>* table_element_vec;
+  std::vector<hsql::TableElement*>* table_index_element_vec;
   std::vector<hsql::TableRef*>* table_vec;
   std::vector<hsql::UpdateClause*>* update_vec;
   std::vector<hsql::WithDescription*>* with_description_vec;
@@ -186,7 +188,7 @@
         }
       }
       delete ($$);
-    } <table_vec> <table_element_vec> <update_vec> <expr_vec> <order_vec> <stmt_vec>
+    } <table_vec> <table_element_vec> <table_index_element_vec> <update_vec> <expr_vec> <order_vec> <stmt_vec>
     %destructor { delete ($$); } <*>
 
 
@@ -261,6 +263,7 @@
     %type <datetime_field>         datetime_field datetime_field_plural duration_field
     %type <column_t>               column_def
     %type <table_element_t>        table_elem
+    %type <table_index_element_t>  float_index_elem
     %type <column_type_t>          column_type
     %type <table_constraint_t>     table_constraint
     %type <update_t>               update_clause
@@ -287,6 +290,7 @@
     %type <with_description_vec>   opt_with_clause with_clause with_description_list
     %type <update_vec>             update_clause_commalist
     %type <table_element_vec>      table_elem_commalist
+    %type <table_index_element_vec> float_index_elem_commalist
     %type <locking_clause_vec>     opt_locking_clause_list opt_locking_clause
 
     /******************************
@@ -551,6 +555,20 @@ create_statement : CREATE TABLE opt_not_exists table_name FROM IDENTIFIER FILE f
   $$->tableName = $6.name;
   $$->indexColumns = $8;
 }
+| CREATE INDEX opt_not_exists opt_index_name '(' float_index_elem_commalist ')' ON table_name '(' ident_commalist ')' {
+  $$ = new CreateStatement(kCreateVectorIndex);
+  $$->ifNotExists = $3;
+  $$->indexName = $4;
+  $$->setFloatArrayIndexConstraints($6);
+  delete $6;
+  $$->tableName = $9.name;
+  $$->indexColumns = $11;
+  
+  if (result->errorMsg()) {
+    delete $$;
+    YYERROR;
+  }
+}
 | CREATE VIEW opt_not_exists table_name opt_column_list AS select_statement {
   $$ = new CreateStatement(kCreateView);
   $$->ifNotExists = $3;
@@ -581,6 +599,18 @@ column_def : IDENTIFIER column_type opt_column_constraints {
     yyerror(&yyloc, result, scanner, ("Conflicting nullability constraints for " + std::string{$1}).c_str());
   }
 };
+
+float_index_elem_commalist : float_index_elem{
+  $$ = new std::vector<TableElement*>();
+  $$->push_back($1);
+}
+| float_index_elem_commalist ',' float_index_elem {
+  $1->push_back($3);
+  $$ = $1;
+};
+
+float_index_elem : IDENTIFIER INTVAL { $$ = new VectorIndexDefinition($1,$2); };
+
 
 column_type : BIGINT { $$ = ColumnType{DataType::BIGINT}; }
 | BOOLEAN { $$ = ColumnType{DataType::BOOLEAN}; }
