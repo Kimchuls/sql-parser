@@ -23,6 +23,11 @@ ColumnDefinition::~ColumnDefinition() {
   delete column_constraints;
 }
 
+VectorIndexDefinition::VectorIndexDefinition(char* constraint_name, int constraint_value)
+    : name(constraint_name), value(constraint_value){}
+
+VectorIndexDefinition::~VectorIndexDefinition() { free(name); }
+
 ColumnType::ColumnType(DataType data_type, int64_t length, int64_t precision, int64_t scale)
     : data_type(data_type), length(length), precision(precision), scale(scale) {}
 

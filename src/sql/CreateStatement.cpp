@@ -67,4 +67,13 @@ void CreateStatement::setColumnDefsAndConstraints(std::vector<TableElement*>* ta
   }
 }
 
+void CreateStatement::setFloatArrayIndexConstraints(std::vector<TableElement*>* tableElements) {
+  float_array_index_constraints = new std::vector<VectorIndexDefinition*>();
+  for (auto tableElem : *tableElements) {
+    if (auto* floatArrayIdex = dynamic_cast<VectorIndexDefinition*>(tableElem)) {
+      float_array_index_constraints->emplace_back(floatArrayIdex);
+    }
+  }
+}
+
 }  // namespace hsql

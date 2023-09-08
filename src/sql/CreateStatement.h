@@ -53,11 +53,21 @@ struct ColumnDefinition : TableElement {
   bool nullable;
 };
 
+
+struct VectorIndexDefinition: TableElement{
+  VectorIndexDefinition(char* constraint_name, int constraint_value);
+  ~VectorIndexDefinition() override;
+
+  char* name;
+  int value;
+};
+
 enum CreateType {
   kCreateTable,
   kCreateTableFromTbl,  // Hyrise file format
   kCreateView,
-  kCreateIndex
+  kCreateIndex,
+  kCreateVectorIndex
 };
 
 // Represents SQL Create statements.
@@ -67,6 +77,7 @@ struct CreateStatement : SQLStatement {
   ~CreateStatement() override;
 
   void setColumnDefsAndConstraints(std::vector<TableElement*>* tableElements);
+  void setFloatArrayIndexConstraints(std::vector<TableElement*>* tableElements);
 
   CreateType type;
   bool ifNotExists;                                 // default: false
@@ -78,6 +89,7 @@ struct CreateStatement : SQLStatement {
   std::vector<ColumnDefinition*>* columns;          // default: nullptr
   std::vector<TableConstraint*>* tableConstraints;  // default: nullptr
   std::vector<char*>* viewColumns;
+  std::vector<VectorIndexDefinition*>* float_array_index_constraints;
   SelectStatement* select;
 };
 
