@@ -281,6 +281,7 @@ union HSQL_STYPE
   double fval;
   int64_t ival;
   uintmax_t uval;
+  float* qval;
 
   // statements
   hsql::AlterStatement* alter_stmt;
@@ -288,6 +289,7 @@ union HSQL_STYPE
   hsql::DeleteStatement* delete_stmt;
   hsql::DropStatement* drop_stmt;
   hsql::ExecuteStatement* exec_stmt;
+  hsql::SetStatement* set_stmt;
   hsql::ExportStatement* export_stmt;
   hsql::ImportStatement* import_stmt;
   hsql::InsertStatement* insert_stmt;
@@ -327,6 +329,7 @@ union HSQL_STYPE
   hsql::WithDescription* with_description_t;
 
   std::vector<char*>* str_vec;
+  std::vector<float*>* query_vec;
   std::unordered_set<hsql::ConstraintType>* column_constraint_set;
   std::vector<hsql::Expr*>* expr_vec;
   std::vector<hsql::OrderDescription*>* order_vec;
@@ -343,7 +346,7 @@ union HSQL_STYPE
   hsql::RowLockMode lock_mode_t;
   hsql::RowLockWaitPolicy lock_wait_policy_t;
 
-#line 347 "bison_parser.h"
+#line 350 "bison_parser.h"
 
 };
 typedef union HSQL_STYPE HSQL_STYPE;

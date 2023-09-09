@@ -1,12 +1,13 @@
 #ifndef SQLPARSER_SELECT_STATEMENT_H
 #define SQLPARSER_SELECT_STATEMENT_H
 
+#include <cstring>
 #include "Expr.h"
 #include "SQLStatement.h"
 #include "Table.h"
 
 namespace hsql {
-enum OrderType { kOrderAsc, kOrderDesc };
+enum OrderType { kOrderAsc, kOrderDesc, kOrderSimilarK };
 
 enum SetType { kSetUnion, kSetIntersect, kSetExcept };
 
@@ -16,10 +17,14 @@ enum RowLockWaitPolicy { NoWait, SkipLocked, None };
 // Description of the order by clause within a select statement.
 struct OrderDescription {
   OrderDescription(OrderType type, Expr* expr);
+  OrderDescription(OrderType type, char* columnName, char* indexName, std::vector<float*>* vectorQueries);
   virtual ~OrderDescription();
 
   OrderType type;
   Expr* expr;
+  char* columnName;
+  char* indexName;
+  std::vector<float*>* vectorQueries;
 };
 
 // Description of the limit clause within a select statement.

@@ -11,6 +11,7 @@
 #include "InsertStatement.h"
 #include "PrepareStatement.h"
 #include "SelectStatement.h"
+#include "SetStatement.h"
 #include "ShowStatement.h"
 #include "TransactionStatement.h"
 #include "UpdateStatement.h"

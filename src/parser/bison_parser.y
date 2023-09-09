@@ -100,6 +100,7 @@
   double fval;
   int64_t ival;
   uintmax_t uval;
+  float* qval;
 
   // statements
   hsql::AlterStatement* alter_stmt;
@@ -107,6 +108,7 @@
   hsql::DeleteStatement* delete_stmt;
   hsql::DropStatement* drop_stmt;
   hsql::ExecuteStatement* exec_stmt;
+  hsql::SetStatement* set_stmt;
   hsql::ExportStatement* export_stmt;
   hsql::ImportStatement* import_stmt;
   hsql::InsertStatement* insert_stmt;
@@ -146,6 +148,7 @@
   hsql::WithDescription* with_description_t;
 
   std::vector<char*>* str_vec;
+  std::vector<float*>* query_vec;
   std::unordered_set<hsql::ConstraintType>* column_constraint_set;
   std::vector<hsql::Expr*>* expr_vec;
   std::vector<hsql::OrderDescription*>* order_vec;
@@ -188,7 +191,7 @@
         }
       }
       delete ($$);
-    } <table_vec> <table_element_vec> <table_index_element_vec> <update_vec> <expr_vec> <order_vec> <stmt_vec>
+    } <table_vec> <table_element_vec> <table_index_element_vec> <update_vec> <expr_vec> <order_vec> <stmt_vec> <query_vec>
     %destructor { delete ($$); } <*>
 
 
@@ -226,6 +229,7 @@
      *********************************/
     %type <stmt_vec>               statement_list
     %type <statement>              statement preparable_statement
+    %type <set_stmt>               set_statement
     %type <exec_stmt>              execute_statement
     %type <transaction_stmt>       transaction_statement
     %type <prep_stmt>              prepare_statement
@@ -259,6 +263,7 @@
     %type <expr>                   array_expr array_index null_literal
     %type <limit>                  opt_limit opt_top
     %type <order>                  order_desc
+    %type <qval>                   query_item
     %type <order_type>             opt_order_type
     %type <datetime_field>         datetime_field datetime_field_plural duration_field
     %type <column_t>               column_def
@@ -287,6 +292,7 @@
     %type <expr_vec>               expr_list select_list opt_literal_list literal_list hint_list opt_hints opt_partition
     %type <table_vec>              table_ref_commalist
     %type <order_vec>              opt_order order_list
+    %type <query_vec>              query_list
     %type <with_description_vec>   opt_with_clause with_clause with_description_list
     %type <update_vec>             update_clause_commalist
     %type <table_element_vec>      table_elem_commalist
@@ -376,7 +382,8 @@ preparable_statement : select_statement { $$ = $1; }
 | drop_statement { $$ = $1; }
 | alter_statement { $$ = $1; }
 | execute_statement { $$ = $1; }
-| transaction_statement { $$ = $1; };
+| transaction_statement { $$ = $1; }
+| set_statement { $$ = $1; };
 
 /******************************
  * Hints
@@ -548,22 +555,21 @@ create_statement : CREATE TABLE opt_not_exists table_name FROM IDENTIFIER FILE f
   $$->tableName = $4.name;
   $$->select = $6;
 }
-| CREATE INDEX opt_not_exists opt_index_name ON table_name '(' ident_commalist ')' {
-  $$ = new CreateStatement(kCreateIndex);
-  $$->indexName = $4;
-  $$->ifNotExists = $3;
-  $$->tableName = $6.name;
-  $$->indexColumns = $8;
-}
-| CREATE INDEX opt_not_exists opt_index_name '(' float_index_elem_commalist ')' ON table_name '(' ident_commalist ')' {
+// | CREATE INDEX opt_not_exists opt_index_name ON table_name '(' ident_commalist ')' {
+//   $$ = new CreateStatement(kCreateIndex);
+//   $$->indexName = $4;
+//   $$->ifNotExists = $3;
+//   $$->tableName = $6.name;
+//   $$->indexColumns = $8;
+// }
+| CREATE INDEX opt_not_exists ON table_name USING opt_index_name '(' ident_commalist ')' WITH '(' float_index_elem_commalist ')'  {
   $$ = new CreateStatement(kCreateVectorIndex);
   $$->ifNotExists = $3;
-  $$->indexName = $4;
-  $$->setFloatArrayIndexConstraints($6);
-  delete $6;
-  $$->tableName = $9.name;
-  $$->indexColumns = $11;
-  
+  $$->tableName = $5.name;
+  $$->indexName = $7;
+  $$->indexColumns = $9;
+  $$->setFloatArrayIndexConstraints($13);
+  delete $13;
   if (result->errorMsg()) {
     delete $$;
     YYERROR;
@@ -600,7 +606,7 @@ column_def : IDENTIFIER column_type opt_column_constraints {
   }
 };
 
-float_index_elem_commalist : float_index_elem{
+float_index_elem_commalist : float_index_elem {
   $$ = new std::vector<TableElement*>();
   $$->push_back($1);
 }
@@ -609,7 +615,7 @@ float_index_elem_commalist : float_index_elem{
   $$ = $1;
 };
 
-float_index_elem : IDENTIFIER INTVAL { $$ = new VectorIndexDefinition($1,$2); };
+float_index_elem : IDENTIFIER '=' INTVAL { $$ = new VectorIndexDefinition($1,$3); };
 
 
 column_type : BIGINT { $$ = ColumnType{DataType::BIGINT}; }
@@ -782,6 +788,14 @@ update_clause : IDENTIFIER '=' expr {
 };
 
 /******************************
+ * Set Statement
+ ******************************/
+
+ set_statement : SET IDENTIFIER '.' IDENTIFIER '.' IDENTIFIER '=' INTVAL{
+  $$ = new SetStatement($2, $4, $6, $8);
+ };
+
+/******************************
  * Select Statement
  ******************************/
 
@@ -901,7 +915,22 @@ opt_having : HAVING expr { $$ = $2; }
 | /* empty */ { $$ = nullptr; };
 
 opt_order : ORDER BY order_list { $$ = $3; }
+| ORDER BY IDENTIFIER '<' IDENTIFIER '>' query_list{
+  $$ = new std::vector<OrderDescription*>();
+  $$->push_back(new OrderDescription(kOrderSimilarK, $3, $5, $7));
+}
 | /* empty */ { $$ = nullptr; };
+
+query_list : query_list ',' query_item {
+  $1->push_back($3);
+  $$ = $1;
+}
+| query_item {
+  $$ = new std::vector<float*>();
+  $$->push_back($1);
+};
+
+query_item: STRING { $$ = Expr::makeQueryVector($1); };
 
 order_list : order_desc {
   $$ = new std::vector<OrderDescription*>();

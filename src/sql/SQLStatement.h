@@ -21,6 +21,7 @@ enum StatementType {
   kStmtRename,
   kStmtAlter,
   kStmtShow,
+  kStmtSet,
   kStmtTransaction
 };
 

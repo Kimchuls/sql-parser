@@ -24,7 +24,7 @@ ColumnDefinition::~ColumnDefinition() {
 }
 
 VectorIndexDefinition::VectorIndexDefinition(char* constraint_name, int constraint_value)
-    : name(constraint_name), value(constraint_value){}
+    : name(constraint_name), value(constraint_value) {}
 
 VectorIndexDefinition::~VectorIndexDefinition() { free(name); }
 
@@ -219,12 +219,33 @@ ShowStatement::~ShowStatement() {
   free(name);
 }
 
+//SetStatement
+SetStatement::SetStatement(char* tableName, char* indexName, char* parameterName, int value)
+    : SQLStatement(kStmtSet), tableName(tableName), indexName(indexName), parameterName(parameterName), value(value) {}
+SetStatement::~SetStatement() {
+  free(tableName);
+  free(indexName);
+  free(parameterName);
+}
+
 // SelectStatement.h
 
 // OrderDescription
-OrderDescription::OrderDescription(OrderType type, Expr* expr) : type(type), expr(expr) {}
+OrderDescription::OrderDescription(OrderType type, Expr* expr)
+    : type(type), expr(expr), columnName(nullptr), indexName(nullptr), vectorQueries(nullptr) {}
 
-OrderDescription::~OrderDescription() { delete expr; }
+OrderDescription::OrderDescription(OrderType type, char* columnName, char* indexName,
+                                   std::vector<float*>* vectorQueries)
+    : type(type), expr(nullptr), columnName(columnName), indexName(indexName), vectorQueries(vectorQueries) {}
+
+OrderDescription::~OrderDescription() {
+  delete expr;
+  delete columnName;
+  delete indexName;
+  for (float* query : *vectorQueries) {
+    free(query);
+  }
+}
 
 // LimitDescription
 LimitDescription::LimitDescription(Expr* limit, Expr* offset) : limit(limit), offset(offset) {}

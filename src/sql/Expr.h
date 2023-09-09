@@ -189,6 +189,7 @@ struct Expr {
 
   static Expr* makeLiteral(char* val);
   static Expr* makeVectorLiteral(char* string);
+  static float* makeQueryVector(char* string);
 
   static Expr* makeLiteral(bool val);
 
