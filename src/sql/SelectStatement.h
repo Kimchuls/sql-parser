@@ -14,17 +14,27 @@ enum SetType { kSetUnion, kSetIntersect, kSetExcept };
 enum RowLockMode { ForUpdate, ForNoKeyUpdate, ForShare, ForKeyShare };
 enum RowLockWaitPolicy { NoWait, SkipLocked, None };
 
+struct VectorQueries {
+  VectorQueries();
+  ~VectorQueries();
+  void append(std::vector<float>* singleQuery);
+  float* data() { return multipleQueries.data(); }
+  int dim;
+  int nq;
+  std::vector<float> multipleQueries;
+};
+
 // Description of the order by clause within a select statement.
 struct OrderDescription {
   OrderDescription(OrderType type, Expr* expr);
-  OrderDescription(OrderType type, char* columnName, char* indexName, std::vector<float*>* vectorQueries);
+  OrderDescription(OrderType type, char* columnName, char* indexName, VectorQueries* vectorQueries);
   virtual ~OrderDescription();
 
   OrderType type;
   Expr* expr;
   char* columnName;
   char* indexName;
-  std::vector<float*>* vectorQueries;
+  VectorQueries* vectorQueries;
 };
 
 // Description of the limit clause within a select statement.

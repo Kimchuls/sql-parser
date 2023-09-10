@@ -257,14 +257,16 @@ extern int hsql_debug;
     SQL_FOLLOWING = 425,           /* FOLLOWING  */
     SQL_PRECEDING = 426,           /* PRECEDING  */
     SQL_CURRENT_ROW = 427,         /* CURRENT_ROW  */
-    SQL_EQUALS = 428,              /* EQUALS  */
-    SQL_NOTEQUALS = 429,           /* NOTEQUALS  */
-    SQL_LESS = 430,                /* LESS  */
-    SQL_GREATER = 431,             /* GREATER  */
-    SQL_LESSEQ = 432,              /* LESSEQ  */
-    SQL_GREATEREQ = 433,           /* GREATEREQ  */
-    SQL_NOTNULL = 434,             /* NOTNULL  */
-    SQL_UMINUS = 435               /* UMINUS  */
+    SQL_INDEX_IVFFLAT = 428,       /* INDEX_IVFFLAT  */
+    SQL_INDEX_HNSW = 429,          /* INDEX_HNSW  */
+    SQL_EQUALS = 430,              /* EQUALS  */
+    SQL_NOTEQUALS = 431,           /* NOTEQUALS  */
+    SQL_LESS = 432,                /* LESS  */
+    SQL_GREATER = 433,             /* GREATER  */
+    SQL_LESSEQ = 434,              /* LESSEQ  */
+    SQL_GREATEREQ = 435,           /* GREATEREQ  */
+    SQL_NOTNULL = 436,             /* NOTNULL  */
+    SQL_UMINUS = 437               /* UMINUS  */
   };
   typedef enum hsql_tokentype hsql_token_kind_t;
 #endif
@@ -317,6 +319,7 @@ union HSQL_STYPE
   hsql::LimitDescription* limit;
   hsql::LockingClause* locking_t;
   hsql::OrderDescription* order;
+  hsql::VectorQueries* queries_vec;
   hsql::OrderType order_type;
   hsql::SetOperation* set_operator_t;
   hsql::TableConstraint* table_constraint_t;
@@ -329,7 +332,7 @@ union HSQL_STYPE
   hsql::WithDescription* with_description_t;
 
   std::vector<char*>* str_vec;
-  std::vector<float*>* query_vec;
+  std::vector<float>* query_vec;
   std::unordered_set<hsql::ConstraintType>* column_constraint_set;
   std::vector<hsql::Expr*>* expr_vec;
   std::vector<hsql::OrderDescription*>* order_vec;
@@ -346,7 +349,7 @@ union HSQL_STYPE
   hsql::RowLockMode lock_mode_t;
   hsql::RowLockWaitPolicy lock_wait_policy_t;
 
-#line 350 "bison_parser.h"
+#line 353 "bison_parser.h"
 
 };
 typedef union HSQL_STYPE HSQL_STYPE;

@@ -159,10 +159,9 @@ Expr* Expr::makeLiteral(char* string) {
   return e;
 }
 
-
-float* Expr::makeQueryVector(char* string) {
+std::vector<float>* Expr::makeQueryVector(char* string) {
   std::string::size_type pos = 0, length = strlen(string);
-  std::vector<float> result;
+  std::vector<float>* result =new std::vector<float>{};
   while (pos < length) {
     if (string[pos] == '[' || string[pos] == ']') {
       pos++;
@@ -192,14 +191,14 @@ float* Expr::makeQueryVector(char* string) {
       }
       if (string[pos] == ',' || string[pos] == ']') {
         pos++;
-        result.push_back(number * syb);
+        result->push_back(number * syb);
       } else {
         printf("data format for float array is wrong: %s\n", string);
         exit(0);
       }
     }
   }
-  return result.data();
+  return result;
 }
 
 Expr* Expr::makeVectorLiteral(char* string) {
@@ -213,9 +212,9 @@ Expr* Expr::makeVectorLiteral(char* string) {
       while (string[pos] == ' ') {
         pos++;
       }
-      double number = 0.0, t = 1.0,syb=1.0;
-      if(string[pos]=='-'){
-        syb=-1.0;
+      double number = 0.0, t = 1.0, syb = 1.0;
+      if (string[pos] == '-') {
+        syb = -1.0;
         pos++;
       }
       while (string[pos] >= '0' && string[pos] <= '9') {
@@ -233,11 +232,11 @@ Expr* Expr::makeVectorLiteral(char* string) {
       while (string[pos] == ' ') {
         pos++;
       }
-      if (string[pos] == ',' || string[pos] == ']')  {
+      if (string[pos] == ',' || string[pos] == ']') {
         pos++;
-        result += number*syb;
+        result += number * syb;
       } else {
-        printf("data format for float array is wrong: %s\n",string);
+        printf("data format for float array is wrong: %s\n", string);
         exit(0);
       }
     }

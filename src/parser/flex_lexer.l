@@ -236,6 +236,8 @@ CHARACTER[ \t\n]+VARYING TOKEN(CHARACTER_VARYING)
 ">="        TOKEN(GREATEREQ)
 "||"        TOKEN(CONCAT)
 "<->"       TOKEN(SIMILAR)
+"<!>"       TOKEN(INDEX_IVFFLAT)
+"<$>"       TOKEN(INDEX_HNSW)
 
 [-+*/(){},.;<>=^%:?[\]|]    { return yytext[0]; }
 

@@ -229,22 +229,47 @@ SetStatement::~SetStatement() {
 }
 
 // SelectStatement.h
+VectorQueries::VectorQueries() : dim(0), nq(0), multipleQueries({}) {}
+void VectorQueries::append(std::vector<float>* singleQuery) {
+  if (dim == 0) dim = singleQuery->size();
+  nq++;
+  for (size_t it = 0; it < singleQuery->size(); it++) {
+    multipleQueries.push_back((*singleQuery)[it]);
+  }
+}
+VectorQueries::~VectorQueries() { 
+  // delete multipleQueries; 
+  std::vector<float>().swap(multipleQueries);
+  }
 
 // OrderDescription
-OrderDescription::OrderDescription(OrderType type, Expr* expr)
-    : type(type), expr(expr), columnName(nullptr), indexName(nullptr), vectorQueries(nullptr) {}
 
-OrderDescription::OrderDescription(OrderType type, char* columnName, char* indexName,
-                                   std::vector<float*>* vectorQueries)
-    : type(type), expr(nullptr), columnName(columnName), indexName(indexName), vectorQueries(vectorQueries) {}
+// OrderDescription::OrderDescription(OrderType type, Expr* expr)
+//     : type(type), expr(expr){}
+OrderDescription::OrderDescription(OrderType type, Expr* expr)
+    : type(type), expr(expr)
+    , columnName(nullptr)
+    , indexName(nullptr)
+    , vectorQueries(new VectorQueries()) 
+    {}
+
+OrderDescription::OrderDescription(OrderType type, char* columnName, char* indexName, VectorQueries* vectorQueries)
+    : type(type), expr(nullptr)
+    , columnName(columnName)
+    , indexName(indexName)
+    , vectorQueries(vectorQueries)
+     {
+      
+     }
 
 OrderDescription::~OrderDescription() {
-  delete expr;
-  delete columnName;
-  delete indexName;
-  for (float* query : *vectorQueries) {
-    free(query);
+  if (expr) {
+    delete expr;
   }
+
+  free(columnName);
+  // free(indexName);
+  delete vectorQueries;
 }
 
 // LimitDescription

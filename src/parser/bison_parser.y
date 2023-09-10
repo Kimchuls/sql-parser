@@ -136,6 +136,7 @@
   hsql::LimitDescription* limit;
   hsql::LockingClause* locking_t;
   hsql::OrderDescription* order;
+  hsql::VectorQueries* queries_vec;
   hsql::OrderType order_type;
   hsql::SetOperation* set_operator_t;
   hsql::TableConstraint* table_constraint_t;
@@ -148,7 +149,7 @@
   hsql::WithDescription* with_description_t;
 
   std::vector<char*>* str_vec;
-  std::vector<float*>* query_vec;
+  std::vector<float>* query_vec;
   std::unordered_set<hsql::ConstraintType>* column_constraint_set;
   std::vector<hsql::Expr*>* expr_vec;
   std::vector<hsql::OrderDescription*>* order_vec;
@@ -182,7 +183,7 @@
         }
       }
       delete ($$);
-    } <str_vec>
+    } <str_vec> 
     %destructor { free( ($$) ); } <sval>
     %destructor {
       if ($$) {
@@ -191,7 +192,7 @@
         }
       }
       delete ($$);
-    } <table_vec> <table_element_vec> <table_index_element_vec> <update_vec> <expr_vec> <order_vec> <stmt_vec> <query_vec>
+    } <table_vec> <table_element_vec> <table_index_element_vec> <update_vec> <expr_vec> <order_vec> <stmt_vec> 
     %destructor { delete ($$); } <*>
 
 
@@ -223,6 +224,7 @@
     %token TRANSACTION BEGIN COMMIT ROLLBACK
     %token NOWAIT SKIP LOCKED SHARE
     %token RANGE ROWS GROUPS UNBOUNDED FOLLOWING PRECEDING CURRENT_ROW
+    %token INDEX_IVFFLAT INDEX_HNSW
 
     /*********************************
      ** Non-Terminal types (http://www.gnu.org/software/bison/manual/html_node/Type-Decl.html)
@@ -263,8 +265,9 @@
     %type <expr>                   array_expr array_index null_literal
     %type <limit>                  opt_limit opt_top
     %type <order>                  order_desc
-    %type <qval>                   query_item
+    %type <query_vec>              query_item
     %type <order_type>             opt_order_type
+    %type <sval>                   index_order_type
     %type <datetime_field>         datetime_field datetime_field_plural duration_field
     %type <column_t>               column_def
     %type <table_element_t>        table_elem
@@ -292,7 +295,7 @@
     %type <expr_vec>               expr_list select_list opt_literal_list literal_list hint_list opt_hints opt_partition
     %type <table_vec>              table_ref_commalist
     %type <order_vec>              opt_order order_list
-    %type <query_vec>              query_list
+    %type <queries_vec>            query_list
     %type <with_description_vec>   opt_with_clause with_clause with_description_list
     %type <update_vec>             update_clause_commalist
     %type <table_element_vec>      table_elem_commalist
@@ -882,6 +885,7 @@ opt_all : ALL { $$ = true; }
 | /* empty */ { $$ = false; };
 
 select_clause : SELECT opt_top opt_distinct select_list opt_from_clause opt_where opt_group {
+  // printf("bison: select_clause\n");
   $$ = new SelectStatement();
   $$->limit = $2;
   $$->selectDistinct = $3;
@@ -915,22 +919,30 @@ opt_having : HAVING expr { $$ = $2; }
 | /* empty */ { $$ = nullptr; };
 
 opt_order : ORDER BY order_list { $$ = $3; }
-| ORDER BY IDENTIFIER '<' IDENTIFIER '>' query_list{
+| ORDER BY IDENTIFIER index_order_type query_list{
+  // printf("bison: ORDER BY IDENTIFIER index_order_type query_list\n");
   $$ = new std::vector<OrderDescription*>();
-  $$->push_back(new OrderDescription(kOrderSimilarK, $3, $5, $7));
+  $$->push_back(new OrderDescription(kOrderSimilarK, $3, $4, $5));
 }
 | /* empty */ { $$ = nullptr; };
 
+index_order_type : INDEX_HNSW {$$ = (char*)"hnsw";}
+| INDEX_IVFFLAT {$$ = (char*)"ivfflat";};
+
 query_list : query_list ',' query_item {
-  $1->push_back($3);
+  // printf("bison: query_list : query_list ',' query_item \n");
+  $1->append($3);
   $$ = $1;
 }
 | query_item {
-  $$ = new std::vector<float*>();
-  $$->push_back($1);
+  // printf("bison: query_item\n");
+  $$ = new VectorQueries();
+  $$->append($1);
 };
 
-query_item: STRING { $$ = Expr::makeQueryVector($1); };
+query_item: STRING { 
+  // printf("bison: query_item: STRING\n");
+  $$ = Expr::makeQueryVector($1); };
 
 order_list : order_desc {
   $$ = new std::vector<OrderDescription*>();
