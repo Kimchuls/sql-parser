@@ -259,14 +259,15 @@ extern int hsql_debug;
     SQL_CURRENT_ROW = 427,         /* CURRENT_ROW  */
     SQL_INDEX_IVFFLAT = 428,       /* INDEX_IVFFLAT  */
     SQL_INDEX_HNSW = 429,          /* INDEX_HNSW  */
-    SQL_EQUALS = 430,              /* EQUALS  */
-    SQL_NOTEQUALS = 431,           /* NOTEQUALS  */
-    SQL_LESS = 432,                /* LESS  */
-    SQL_GREATER = 433,             /* GREATER  */
-    SQL_LESSEQ = 434,              /* LESSEQ  */
-    SQL_GREATEREQ = 435,           /* GREATEREQ  */
-    SQL_NOTNULL = 436,             /* NOTNULL  */
-    SQL_UMINUS = 437               /* UMINUS  */
+    SQL_INDEX_IVFPQ = 430,         /* INDEX_IVFPQ  */
+    SQL_EQUALS = 431,              /* EQUALS  */
+    SQL_NOTEQUALS = 432,           /* NOTEQUALS  */
+    SQL_LESS = 433,                /* LESS  */
+    SQL_GREATER = 434,             /* GREATER  */
+    SQL_LESSEQ = 435,              /* LESSEQ  */
+    SQL_GREATEREQ = 436,           /* GREATEREQ  */
+    SQL_NOTNULL = 437,             /* NOTNULL  */
+    SQL_UMINUS = 438               /* UMINUS  */
   };
   typedef enum hsql_tokentype hsql_token_kind_t;
 #endif
@@ -349,7 +350,7 @@ union HSQL_STYPE
   hsql::RowLockMode lock_mode_t;
   hsql::RowLockWaitPolicy lock_wait_policy_t;
 
-#line 353 "bison_parser.h"
+#line 354 "bison_parser.h"
 
 };
 typedef union HSQL_STYPE HSQL_STYPE;

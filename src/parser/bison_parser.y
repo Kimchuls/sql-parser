@@ -224,7 +224,7 @@
     %token TRANSACTION BEGIN COMMIT ROLLBACK
     %token NOWAIT SKIP LOCKED SHARE
     %token RANGE ROWS GROUPS UNBOUNDED FOLLOWING PRECEDING CURRENT_ROW
-    %token INDEX_IVFFLAT INDEX_HNSW
+    %token INDEX_IVFFLAT INDEX_HNSW INDEX_IVFPQ
 
     /*********************************
      ** Non-Terminal types (http://www.gnu.org/software/bison/manual/html_node/Type-Decl.html)
@@ -927,7 +927,8 @@ opt_order : ORDER BY order_list { $$ = $3; }
 | /* empty */ { $$ = nullptr; };
 
 index_order_type : INDEX_HNSW {$$ = (char*)"hnsw";}
-| INDEX_IVFFLAT {$$ = (char*)"ivfflat";};
+| INDEX_IVFFLAT {$$ = (char*)"ivfflat";}
+| INDEX_IVFPQ {$$ = (char*)"ivfpq";};
 
 query_list : query_list ',' query_item {
   // printf("bison: query_list : query_list ',' query_item \n");
